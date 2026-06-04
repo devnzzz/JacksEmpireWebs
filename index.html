@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>WebzEmpire • Login Experience</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; /* mencegah seleksi teks berlebihan, biar rapih */
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
+            min-height: 100vh;
+            background: url('ThemaBG.jpg') center/cover no-repeat fixed;
+            backdrop-filter: brightness(0.85) blur(1px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        /* overlay agar teks terbaca tanpa merusak gambar latar */
+        .overlay-soft {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(2px);
+            z-index: 0;
+        }
+
+        /* container utama */
+        .glass-card {
+            position: relative;
+            z-index: 2;
+            background: rgba(20, 20, 35, 0.7);
+            backdrop-filter: blur(12px);
+            border-radius: 2.5rem;
+            padding: 2rem 2rem 2.5rem;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        /* judul warna-warni WebzEmpire */
+        .rainbow-title {
+            text-align: center;
+            font-size: 2.8rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #FFD166, #FF6B6B, #4ECDC4, #9B5DE5, #F15BB5, #FEE440);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: gradientFlow 5s ease infinite;
+            margin-bottom: 2rem;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            word-break: keep-all;
+        }
+
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%;}
+            50% { background-position: 100% 50%;}
+            100% { background-position: 0% 50%;}
+        }
+
+        /* tab login = form container */
+        .login-tab {
+            background: rgba(0, 0, 0, 0.55);
+            border-radius: 2rem;
+            padding: 1.8rem 1.5rem 2rem;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,240,0.2);
+            transition: all 0.2s;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group label {
+            display: block;
+            color: rgba(255,255,245,0.9);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            letter-spacing: 0.3px;
+        }
+
+        .input-group input {
+            width: 100%;
+            background: rgba(20, 20, 30, 0.7);
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 1.5rem;
+            padding: 0.9rem 1.2rem;
+            font-size: 1rem;
+            color: white;
+            outline: none;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .input-group input:focus {
+            border-color: #FFB347;
+            background: rgba(0,0,0,0.6);
+            box-shadow: 0 0 0 3px rgba(255, 180, 70, 0.3);
+        }
+
+        .login-btn {
+            width: 100%;
+            background: linear-gradient(95deg, #6C63FF, #3F3D9E);
+            border: none;
+            border-radius: 2rem;
+            padding: 0.85rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 0.8rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            letter-spacing: 0.5px;
+        }
+
+        .login-btn:active {
+            transform: scale(0.97);
+        }
+
+        /* iPhone style notification */
+        .iphone-notif {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: rgba(30,30,40,0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 14px 24px;
+            min-width: 280px;
+            max-width: 90vw;
+            text-align: center;
+            color: white;
+            font-weight: 500;
+            font-size: 0.95rem;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.4), 0 0 0 0.5px rgba(255,255,255,0.2);
+            z-index: 200;
+            transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1), opacity 0.25s;
+            opacity: 0;
+            letter-spacing: 0.2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            border: 1px solid rgba(255,255,255,0.25);
+            pointer-events: none;
+        }
+
+        .iphone-notif.show {
+            transform: translateX(-50%) translateY(0px);
+            opacity: 1;
+        }
+
+        /* icon kecil layaknya notif iphone */
+        .notif-icon {
+            font-size: 1.3rem;
+        }
+
+        /* state maintenance + efek hilangnya tab login */
+        .maintenance-container {
+            position: relative;
+            z-index: 2;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(16px);
+            border-radius: 2.8rem;
+            padding: 2rem 2.5rem;
+            text-align: center;
+            border: 1px solid rgba(255,210,90,0.6);
+            animation: fadeScaleUp 0.5s ease-out;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .maintenance-text {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #FFE6A7;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            background: linear-gradient(145deg, #FFCF5C, #FF9F4A);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 1px;
+        }
+
+        .sub-maint {
+            margin-top: 1rem;
+            color: #dddddd;
+            font-weight: 500;
+        }
+
+        @keyframes fadeScaleUp {
+            from {
+                opacity: 0;
+                transform: scale(0.92);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Smooth transisi untuk menghilangkan tab login */
+        .fade-out {
+            transition: opacity 0.4s ease-out, transform 0.3s;
+            opacity: 0;
+            transform: translateY(10px);
+            pointer-events: none;
+        }
+
+        button {
+            font-family: inherit;
+        }
+    </style>
+</head>
+<body>
+<div class="overlay-soft"></div>
+
+<!-- Container utama yang akan berubah ketika login berhasil -->
+<div id="appRoot" class="glass-card">
+    <div class="rainbow-title">WebzEmpire</div>
+    <div id="loginTab" class="login-tab">
+        <div class="input-group">
+            <label>👤 Username</label>
+            <input type="text" id="usernameInput" placeholder="Masukkan username" autocomplete="off">
+        </div>
+        <div class="input-group">
+            <label>🔒 Password</label>
+            <input type="password" id="passwordInput" placeholder="Password" autocomplete="off">
+        </div>
+        <button class="login-btn" id="loginBtn">Login →</button>
+    </div>
+</div>
+
+<!-- Notifikasi iPhone style (akan dipanggil oleh JS) -->
+<div id="iphoneNotif" class="iphone-notif">
+    <span class="notif-icon">📱</span>
+    <span id="notifMessage">Pesan notifikasi</span>
+</div>
+
+<script>
+    // ---------- Kredensial yang valid ----------
+    const VALID_USERNAME = "LyovanzKey";
+    const VALID_PASSWORD = "Lyovanz123";
+
+    // DOM elements
+    const appRoot = document.getElementById('appRoot');
+    const loginTabDiv = document.getElementById('loginTab');
+    const usernameInput = document.getElementById('usernameInput');
+    const passwordInput = document.getElementById('passwordInput');
+    const loginBtn = document.getElementById('loginBtn');
+    const notifElement = document.getElementById('iphoneNotif');
+    const notifMessageSpan = document.getElementById('notifMessage');
+
+    // state cooldown: mencegah spam notif & login dalam 10 detik setelah notif gagal/berhasil?
+    // namun sesuai permintaan: "nanti kasih animasi notif muncul kaya iphone trus nnti kasih cooldown teks nya selama 10 detik
+    // nanti bila sudh 10 detik animasi tutup animasi iphone ny"
+    // artinya: ketika notif muncul, notif akan tertutup otomatis setelah 10 detik (animasi tutup).
+    // Tidak disebutkan cooldown login, tapi akan lebih baik mencegah spam login saat notif masih aktif,
+    // tapi karena permintaan user friendly: kita beri cooldown pada tombol login selama durasi notif (10 detik) untuk pengalaman rapi.
+    // Dan juga jika berhasil login, seluruh tab login ilang + muncul maintenance, notif iPhone juga muncul "Berhasil login..." lalu 10 detik hilang.
+    // TAPI setelah berhasil login, elemen login sudah hilang, notif tetap bisa hilang natural.
+    
+    let activeNotifTimeout = null;     // timeout untuk menutup notif setelah 10 detik
+    let isCooldownActive = false;      // cooldown tombol login selama notif aktif (10 detik)
+    let isLoggedInSuccess = false;      // mencegah aksi ganda setelah berhasil masuk
+
+    // Fungsi menampilkan notifikasi bergaya iPhone dengan pesan, otomatis hilang dalam 10 detik
+    // dan selama notifikasi aktif, login button disabled + cooldown.
+    function showIphoneNotification(message, isError = true) {
+        // Jika sudah dalam mode maintenance, jangan ganggu (tapi tidak akan ada login lagi)
+        if (isLoggedInSuccess) return;
+
+        // Hapus timeout sebelumnya jika ada (agar timer reset)
+        if (activeNotifTimeout) {
+            clearTimeout(activeNotifTimeout);
+            // jika notif sedang aktif, kita tutup paksa dulu lalu buat baru? lebih mulus: hapus class show
+            notifElement.classList.remove('show');
+            // matikan cooldown sebelumnya
+            if (isCooldownActive) {
+                enableLoginButton(true);
+                isCooldownActive = false;
+            }
+        }
+
+        // set pesan
+        notifMessageSpan.innerText = message;
+        // set icon berbeda sedikit untuk sukses/gagal (optional)
+        const iconSpan = notifElement.querySelector('.notif-icon');
+        if (isError) {
+            iconSpan.innerHTML = '⚠️';
+        } else {
+            iconSpan.innerHTML = '✅';
+        }
+        
+        // tampilkan notif
+        notifElement.classList.add('show');
+        
+        // Disable tombol login dan beri efek cooldown (nonaktif selama 10 detik)
+        if (!isLoggedInSuccess) {
+            disableLoginButton(true);
+            isCooldownActive = true;
+        }
+        
+        // atur timeout 10 detik untuk menutup notif (animasi tutup)
+        activeNotifTimeout = setTimeout(() => {
+            // Animasi tutup notif (hilangkan class show)
+            notifElement.classList.remove('show');
+            // setelah notif tertutup, aktifkan kembali tombol login (kecuali jika sudah login berhasil)
+            if (!isLoggedInSuccess) {
+                if (isCooldownActive) {
+                    enableLoginButton(true);
+                    isCooldownActive = false;
+                }
+            }
+            activeNotifTimeout = null;
+        }, 10000); // 10 detik persis
+    }
+
+    // Fungsi untuk menonaktifkan/mengaktifkan tombol login & interaksi input? biar user nggak spam
+    function disableLoginButton(disabled) {
+        if (disabled) {
+            loginBtn.disabled = true;
+            loginBtn.style.opacity = '0.6';
+            loginBtn.style.cursor = 'not-allowed';
+            loginBtn.innerText = '⏳ Mohon tunggu...';
+        } else {
+            loginBtn.disabled = false;
+            loginBtn.style.opacity = '1';
+            loginBtn.style.cursor = 'pointer';
+            loginBtn.innerText = 'Login →';
+        }
+    }
+    
+    function enableLoginButton(resetCooldownFlag) {
+        if (!isLoggedInSuccess) {
+            loginBtn.disabled = false;
+            loginBtn.style.opacity = '1';
+            loginBtn.style.cursor = 'pointer';
+            loginBtn.innerText = 'Login →';
+        }
+    }
+
+    // Proses login (dipanggil ketika klik login atau enter)
+    function handleLogin() {
+        // Jika sudah berhasil login, tidak boleh memproses lagi
+        if (isLoggedInSuccess) return;
+        // Jika sedang cooldown notifikasi, jangan proses login juga (biar nggak double notif)
+        if (isCooldownActive) {
+            // tapi kasih notif cepat? tidak perlu, tapi bisa kasih notif "Tunggu 10 detik" optional? biar sesuai keinginan utama tidak mengganggu
+            // lebih baik diam saja atau kasih notif kecil? Tapi tidak merusak flow, biarkan tombol disabled secara visual.
+            return;
+        }
+        
+        const enteredUsername = usernameInput.value.trim();
+        const enteredPassword = passwordInput.value;
+        
+        // Validasi
+        if (enteredUsername === VALID_USERNAME && enteredPassword === VALID_PASSWORD) {
+            // LOGIN BERHASIL
+            // Tampilkan notifikasi iPhone sukses dengan format "Berhasil Login. Welcome (username)"
+            const successMsg = `Berhasil Login. Welcome ${enteredUsername}`;
+            showIphoneNotification(successMsg, false);
+            
+            // Setelah berhasil, kita butuh menunggu notifikasi tidak masalah, tetapi efek "semua tab ilang" harus segera terjadi?
+            // Permintaan: "kalau berhasil nanti semua tab ilang trus efek muncul smooth teks nya 'Sedang Dalam Maintance Cuy'"
+            // Jadi meskipun notifikasi masih tampil, kita harus menghilangkan tab login dan mengganti dengan maintenance.
+            // Namun jangan sampai double effect maintenance. Agar smooth, kita langsung panggil fungsi successTransition.
+            // Tapi pastikan tidak dipanggil dua kali.
+            if (!isLoggedInSuccess) {
+                isLoggedInSuccess = true;
+                // Hilangkan semua tab (login tab) dengan animasi smooth, lalu tampilkan maintenance
+                transitionToMaintenance();
+                // Jika ada notif timeout yang belum selesai, kita biarkan notif berjalan, nanti akan hilang otomatis dalam 10 detik.
+                // Dan juga cooldown tombol tidak perlu reset karena tombol sudah dihilangkan.
+            }
+        } else {
+            // LOGIN GAGAL
+            const errorMsg = "Gagal! Mungkin Username Maupun Password Salah";
+            showIphoneNotification(errorMsg, true);
+            // reset input tidak perlu, tapi biarkan user mencoba lagi setelah cooldown.
+            // Efek cooldown sudah di-handle di showIphoneNotification => login button disabled 10 detik.
+        }
+    }
+    
+    // Fungsi transisi: loginTab ilang dengan smooth, lalu tampilkan maintenance container dengan efek smooth.
+    function transitionToMaintenance() {
+        // Tambahkan class fade-out pada loginTab, setelah transisi selesai, sembunyikan dan ganti dengan maintenance.
+        loginTabDiv.classList.add('fade-out');
+        
+        // Tunggu 300ms (durasi transisi) lalu ganti konten root
+        setTimeout(() => {
+            // Hapus loginTab dari DOM atau sembunyikan
+            loginTabDiv.style.display = 'none';
+            // Buat elemen maintenance di dalam appRoot (ganti konten)
+            // Tapi sebelumnya hapus konten lain yang mungkin tersisa (rainbow title masih tetap diinginkan? 
+            // Permintaan: "semua tab ilang" tapi judul "WebzEmpire" ada diatasnya? optional namun lebih baik menjaga judul tetap ada,
+            // tetapi teks maintenance muncul di bawah, tapi agar lebih keren: kita bisa ganti seluruh appRoot konten? 
+            // Awalnya struktur: appRoot berisi rainbow-title + loginTab. Karena loginTab ilang, bisa kita ganti dengan maintenance.
+            // Sementara rainbow-title bisa tetap ada atau dihilangkan? dari keinginan user "semua tab ilang" - namun judul webz empire mungkin tidak masalah dipertahankan
+            // untuk konsistensi, tapi agar lebih clean dan sesuai "trus efek muncul smooth teks nya Sedang Dalam Maintance Cuy"
+            // saya akan hilangkan juga rainbow-title? tidak perlu, karena tab login benar-benar ilang. tapi agar teks maintenance lebih fokus, saya bisa ganti seluruh isi.
+            // Opsi: ganti innerHTML appRoot dengan maintenance container? Tapi lebih halus: tambah container maintenance di bawah? Tapi judul bisa tetap.
+            // Tapi untuk aman, karena request "semua tab ilang" -> tab login adalah elemen tab. Jadi kita hilangkan login tab.
+            // Saya akan hapus rainbow-title juga? tidak disebut, tapi agar fokus maintenance saya biarkan judul tetap ada sebagai brand, namun banyak user experience biasa mempertahankan.
+            // tapi supaya lebih wow dan sesuai: "semua tab ilang" + muncul smooth teks. Saya akan buat bahwa setelah login berhasil, kita bersihkan appRoot dan tampilkan maintenance center.
+            // tapi supaya tidak pusing, lebih baik simpan judul kecil di maintenance? Saya lakukan : ganti seluruh isi appRoot menjadi maintenance view yang smooth.
+            // Agar efeknya maksimal.
+            const originalRainbow = document.querySelector('.rainbow-title');
+            // backup? kita timpa appRoot full dengan animasi fade
+            // Tapi jangan merusak notifikasi karena notifikasi global tetap di luar.
+            // Lebih elegan: appRoot.innerHTML diubah jadi maintenance container.
+            // kita lakukan transisi halus.
+            appRoot.style.transition = 'opacity 0.3s ease-out';
+            appRoot.style.opacity = '0';
+            
+            setTimeout(() => {
+                // Ganti seluruh konten di dalam appRoot dengan layout maintenance
+                appRoot.innerHTML = `
+                    <div class="maintenance-container">
+                        <div class="maintenance-text">⚙️ Sedang Dalam Maintance Cuy ⚙️</div>
+                        <div class="sub-maint">✨ Kembali lagi nanti ya! ✨</div>
+                    </div>
+                `;
+                appRoot.style.opacity = '1';
+                appRoot.style.background = 'rgba(0,0,0,0.75)';
+                appRoot.style.backdropFilter = 'blur(18px)';
+                // Tidak lupa menyesuaikan border
+                appRoot.style.border = '1px solid rgba(255,180,70,0.5)';
+                // Hapus class fade-out dll
+            }, 200);
+        }, 300);
+    }
+    
+    // Event listener untuk tombol login
+    loginBtn.addEventListener('click', handleLogin);
+    
+    // Tambahkan event enter pada input field
+    usernameInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (!loginBtn.disabled && !isCooldownActive && !isLoggedInSuccess) {
+                handleLogin();
+            }
+        }
+    });
+    passwordInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (!loginBtn.disabled && !isCooldownActive && !isLoggedInSuccess) {
+                handleLogin();
+            }
+        }
+    });
+    
+    // styling tambahan untuk input placeholder
+    // preloading image background - jika gambar ThemaBG.jpg tidak ada, tetap aman.
+    // pesan khusus: ada kalanya environment notifikasi sempurna.
+    
+    // tidak lupa reset jika state awal 
+    // Saat halaman dimuat, tidak ada notif aktif, tombol aktif.
+    console.log("Ready — WebzEmpire with iPhone notif & cooldown 10 detik");
+    
+    // tambahan fitur: jika ada pengguna ingin melihat bahwa latar belakang ThemaBG.jpg harus ada
+    // kita bisa cek, tapi tidak wajib karena user sudah menyediakan file tsb.
+    // background-image di body sudah mengarah ke file yang sama.
+    // optional: fallback color kalau gambarnya gak ada, tapi gak masalah
+    // selesai
+</script>
+</body>
+</html>
