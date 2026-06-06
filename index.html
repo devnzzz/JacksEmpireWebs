@@ -719,7 +719,11 @@
 
       // Set video src AFTER element is visible in DOM
       setTimeout(() => {
-        vid.src = 'https://devnzzz.github.io/JacksEmpireWebs/' + src;
+        const videoMap = {
+          'video1.mp4': 'https://files.catbox.moe/p7ik21.mp4',
+          'video2.mp4': 'https://files.catbox.moe/4hoxcq.mp4'
+        };
+        vid.src = videoMap[src] || src;
         vid.load();
       }, 100);
     }, 400);
