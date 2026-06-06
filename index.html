@@ -712,17 +712,16 @@
       dash.style.transform = '';
 
       lbl.textContent = label;
-      while (vid.firstChild) vid.removeChild(vid.firstChild);
-      vid.removeAttribute('src');
-      const source = document.createElement('source');
-      source.src = 'https://devnzzz.github.io/JacksEmpireWebs/' + src;
-      source.type = 'video/mp4';
-      vid.appendChild(source);
-      vid.load();
       document.getElementById('playPauseBtn').textContent = '▶';
 
       vp.style.display = 'block';
       requestAnimationFrame(() => vp.classList.add('show'));
+
+      // Set video src AFTER element is visible in DOM
+      setTimeout(() => {
+        vid.src = 'https://devnzzz.github.io/JacksEmpireWebs/' + src;
+        vid.load();
+      }, 100);
     }, 400);
   }
 
@@ -730,8 +729,11 @@
     const vid = document.getElementById('mainVideo');
     const btn = document.getElementById('playPauseBtn');
     if (vid.paused) {
-      vid.play();
-      btn.textContent = '⏸';
+      vid.play().then(() => {
+        btn.textContent = '⏸';
+      }).catch(e => {
+        console.log('Play error:', e);
+      });
     } else {
       vid.pause();
       btn.textContent = '▶';
