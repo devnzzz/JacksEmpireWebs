@@ -712,7 +712,12 @@
       dash.style.transform = '';
 
       lbl.textContent = label;
-      vid.src = src;
+      while (vid.firstChild) vid.removeChild(vid.firstChild);
+      vid.removeAttribute('src');
+      const source = document.createElement('source');
+      source.src = 'https://devnzzz.github.io/JacksEmpireWebs/' + src;
+      source.type = 'video/mp4';
+      vid.appendChild(source);
       vid.load();
       document.getElementById('playPauseBtn').textContent = '▶';
 
