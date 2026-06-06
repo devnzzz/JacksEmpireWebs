@@ -712,8 +712,8 @@
       dash.style.transform = '';
 
       lbl.textContent = label;
-      // Map filename to raw GitHub URL
-      const rawBase = 'https://raw.githubusercontent.com/devnzzz/JacksEmpireWebs/main/';
+      // Map filename to GitHub Pages URL (same domain)
+      const rawBase = 'https://devnzzz.github.io/JacksEmpireWebs/';
       vid.src = rawBase + src;
       vid.load();
       document.getElementById('playPauseBtn').textContent = '▶';
