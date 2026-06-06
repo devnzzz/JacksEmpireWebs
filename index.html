@@ -712,7 +712,9 @@
       dash.style.transform = '';
 
       lbl.textContent = label;
-      vid.src = src;
+      // Map filename to raw GitHub URL
+      const rawBase = 'https://raw.githubusercontent.com/devnzzz/JacksEmpireWebs/main/';
+      vid.src = rawBase + src;
       vid.load();
       document.getElementById('playPauseBtn').textContent = '▶';
 
